@@ -7,7 +7,7 @@ the sum of a list of floats.
 Type annotations are used to clarify the expected input and output types.
 """
 
-from typing import list
+from typing import List
 
 
 def sum_list(input_list: List[float]) -> float:
