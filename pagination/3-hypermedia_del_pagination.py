@@ -9,7 +9,8 @@ from typing import List, Dict
 
 
 class Server:
-    """Server class to paginate a database of popular baby names."""
+    """Server class to paginate a database of popular baby names.
+    """
     DATA_FILE = "Popular_Baby_Names.csv"
 
     def __init__(self):
@@ -17,7 +18,8 @@ class Server:
         self.__indexed_dataset = None
 
     def dataset(self) -> List[List]:
-        """Cached dataset"""
+        """Cached dataset
+        """
         if self.__dataset is None:
             with open(self.DATA_FILE) as f:
                 reader = csv.reader(f)
@@ -27,45 +29,40 @@ class Server:
         return self.__dataset
 
     def indexed_dataset(self) -> Dict[int, List]:
-        """Dataset indexed by sorting position, starting at 0"""
+        """Dataset indexed by sorting position, starting at 0
+        """
         if self.__indexed_dataset is None:
             dataset = self.dataset()
+            truncated_dataset = dataset[:1000]
             self.__indexed_dataset = {
                 i: dataset[i] for i in range(len(dataset))
             }
         return self.__indexed_dataset
 
     def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
-        """
-        Return a page of the dataset resilient to deletions.
+        """Return dict of pagination data.
 
         Args:
-            index (int): start index for the page.
-            page_size (int): number of items per page.
+            index (int, optional): index. Defaults to None.
+            page_size (int, optional): size of page. Defaults to 10.
 
         Returns:
-            Dict: {
-                'index': starting index,
-                'data': page of data,
-                'page_size': length of data,
-                'next_index': index to query next
-            }
+            Dict: indexed data
         """
-        dataset = self.indexed_dataset()
-        assert isinstance(index, int) and 0 <= index < len(dataset)
+        len_data = len(self.dataset())
+        assert 1 < index < len_data
 
-        data = []
-        current_index = index
-
-        # collect page_size valid items
-        while len(data) < page_size and current_index < len(dataset):
-            if current_index in dataset:
-                data.append(dataset[current_index])
-            current_index += 1
-
-        return {
-            "index": index,
-            "data": data,
-            "page_size": len(data),
-            "next_index": current_index
+        indexed_dataset = self.indexed_dataset()
+        indexed_pages = {}
+        for i in range(index, len_data):
+            if i in indexed_dataset and len(indexed_pages) < page_size:
+                indexed_pages[i] = indexed_dataset[i]
+        pages = list(indexed_pages.values())
+        idx = indexed_pages.keys()
+        indexed_data = {
+            'index': index,
+            'data': pages,
+            'page_size': len(pages),
+            'next_index': max(idx) + 1
         }
+        return indexed_data
