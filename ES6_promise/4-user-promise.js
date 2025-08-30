@@ -1,8 +1,8 @@
-import { resolve } from "path";
-
 export default function signUpUser(firstName, lastName) {
-    return resolve({
-        firstName: value,
-        lastName: value,
-    })
+  return new Promise((resolve) => {
+    resolve({
+      firstName: firstName,
+      lastName: lastName,
+    });
+  });
 }
